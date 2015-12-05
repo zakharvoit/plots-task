@@ -1,10 +1,14 @@
 #ifndef DRAWER_H
 #define DRAWER_H
 
+#include "colorizer.h"
+
 #include <FL/Fl.H>
 #include <FL/Fl_Window.H>
+
 #include <memory>
 #include <map>
+#include <vector>
 
 struct pool_canvas: Fl_Widget
 {
@@ -12,9 +16,13 @@ struct pool_canvas: Fl_Widget
   void rescale(double left, double top, double right, double bottom);
   void set_screen_size(size_t width, size_t height);
   virtual void draw() override;
+  virtual int handle(int event) override;
 
 private:
-  Fl_Color get_color_by_id(int color_id) const;
+  double calculate_eps() const;
+  complex_num calculate_real_point(size_t x, size_t y) const;
+  std::pair<size_t, size_t> calculate_display_point(complex_num const&) const;
+  void highlight_curve_from_point(size_t x, size_t y);
   
   size_t width;
   size_t height;
@@ -23,8 +31,7 @@ private:
   double real_width;
   double real_height;
 
-  mutable std::map<int, Fl_Color> color_map;
-  mutable int first_unused_color;
+  std::vector<complex_num> highlighted_curve;
 };
 
 struct drawer
@@ -32,9 +39,6 @@ struct drawer
   drawer(int argc, char** argv);
 
 private:
-  static const size_t WIDTH = 1920;
-  static const size_t HEIGHT = 1080;
-
   std::unique_ptr<Fl_Window> window;
   std::unique_ptr<pool_canvas> canvas;
 };
