@@ -14,7 +14,6 @@ struct pool_canvas: Fl_Widget
 {
   pool_canvas(size_t width, size_t height);
   void rescale(double left, double top, double right, double bottom);
-  void set_screen_size(size_t width, size_t height);
   virtual void draw() override;
   virtual int handle(int event) override;
 
@@ -23,6 +22,7 @@ private:
   complex_num calculate_real_point(size_t x, size_t y) const;
   std::pair<size_t, size_t> calculate_display_point(complex_num const&) const;
   void highlight_curve_from_point(size_t x, size_t y);
+  void recalculate_field();
   
   size_t width;
   size_t height;
@@ -32,6 +32,7 @@ private:
   double real_height;
 
   std::vector<complex_num> highlighted_curve;
+  std::vector<Fl_Color> field;
 };
 
 struct drawer

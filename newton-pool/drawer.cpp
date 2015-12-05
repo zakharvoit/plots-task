@@ -20,30 +20,28 @@ void pool_canvas::rescale(double x, double y, double width, double height)
   this->y = y;
   this->real_width = width;
   this->real_height = height;
+  recalculate_field();
 }
 
 void pool_canvas::draw()
 {
-  double eps = calculate_eps();
   for (size_t i = 0; i < width; i++) {
     for (size_t j = 0; j < height; j++) {
-      int color_id = get_color(calculate_real_point(i, j), eps);
-      fl_color(color_id);
+      fl_color(field[i * height + j]);
       fl_point(i, j);
     }
   }
-
   fl_color(FL_WHITE);
   fl_line_style(FL_SOLID, 2);
   static const int size = 10;
+  std::cerr << "Drawing convergence\n";
   for (size_t i = 0; i < highlighted_curve.size(); i++) {
     auto const& p = highlighted_curve[i];
     auto const& displayed = calculate_display_point(p);
     fl_pie(displayed.first - size / 2, displayed.second - size / 2, size, size, 0.0, 360.0);
     char buffer[256];
     sprintf(buffer, "(%.2f, %.2f)", p.x, p.y);
-    auto text_size = size * 3;
-    fl_draw(buffer, displayed.first - text_size / 2, displayed.second + text_size / 2, text_size, text_size, FL_ALIGN_LEFT);
+    std::cerr << buffer << std::endl;
     if (i < highlighted_curve.size() - 1) {
       auto const& next = calculate_display_point(highlighted_curve[i + 1]);
       fl_line(displayed.first, displayed.second, next.first, next.second);
@@ -55,7 +53,6 @@ int pool_canvas::handle(int event)
 {
   switch(event) {
   case FL_PUSH:
-    std::cerr << "Pushed!\n";
     highlight_curve_from_point(Fl::event_x(), Fl::event_y());
     return 1;
   }
@@ -83,6 +80,18 @@ void pool_canvas::highlight_curve_from_point(size_t x, size_t y)
   highlighted_curve = get_convergence(point, calculate_eps());
   highlighted_curve.insert(highlighted_curve.begin(), point);
   redraw();
+}
+
+void pool_canvas::recalculate_field()
+{
+  field.resize(width * height);
+  double eps = calculate_eps();
+  for (size_t i = 0; i < width; i++) {
+    for (size_t j = 0; j < height; j++) {
+      int color_id = get_color(calculate_real_point(i, j), eps);
+      field[i * height + j] = color_id;
+    }
+  }
 }
 
 drawer::drawer(int argc, char** argv)
