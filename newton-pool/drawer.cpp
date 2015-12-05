@@ -31,7 +31,7 @@ void pool_canvas::draw()
       fl_point(i, j);
     }
   }
-  fl_color(FL_WHITE);
+  fl_color(FL_BLACK);
   fl_line_style(FL_SOLID, 2);
   static const int size = 10;
   std::cerr << "Drawing convergence\n";
